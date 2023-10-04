@@ -1,6 +1,5 @@
 #include "game.h"
 #include "raylib.h"
-#include <cmath>
 
 #define BALL_RADIUS 20
 #define BALL_SPEED 320
@@ -8,17 +7,19 @@
 #define PADDLE_HEIGHT 80
 #define PADDLE_PADDING 40
 #define PADDLE_SPEED 220
+#define WINNING_SCORE 5
 #define SCORE_FONT_SIZE 50
 
-const int BOT_PADDLE_MIN_SPEED = -std::round(BALL_SPEED / 30);
-const int BOT_PADDLE_MAX_SPEED = std::round(BALL_SPEED / 4);
+const int BOT_PADDLE_MIN_SPEED = -12;
+const int BOT_PADDLE_MAX_SPEED = 80;
 
 Vector2 ballPosition;
 Vector2 ballDirection;
 Rectangle leftPaddle;
 Rectangle rightPaddle;
-int leftScore = 0;
-int rightScore = 0;
+
+int leftScore;
+int rightScore;
 
 void InitializeGame(int windowWidth, int windowHeight) {
 
@@ -163,4 +164,16 @@ void DrawGame(int windowWidth, int windowHeight) {
 	DrawRectangleRec(leftPaddle, RAYWHITE);
 	DrawRectangleRec(rightPaddle, RAYWHITE);
 	//-----------------------------------------------------------------------------
+}
+
+GameState GetGameState() {
+	if (rightScore == WINNING_SCORE) {
+		return Win;
+	}
+	else if (leftScore == WINNING_SCORE) {
+		return Lose;
+	}
+	else {
+		return Unknown;
+	}
 }

@@ -5,7 +5,7 @@
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
 #define TITLE "Pong"
-#define TITLE_FONT_SIZE 150
+#define TITLE_FONT_SIZE 180
 
 enum ProgramState {
 	Menu,
@@ -14,6 +14,7 @@ enum ProgramState {
 };
 
 ProgramState programState = Menu;
+GameState gameState;
 
 void Update();
 void Draw();
@@ -44,11 +45,10 @@ void Update() {
 	case Game:
 	{
 		UpdateGame(WINDOW_WIDTH, WINDOW_HEIGHT);
-
-	}break;
-	case End:
-	{
-
+		if (GetGameState() != Unknown) {
+			programState = End;
+			gameState = GetGameState();
+		}
 	}break;
 	}
 
@@ -62,17 +62,25 @@ void Draw() {
 	switch (programState) {
 	case Menu:
 	{
-		DrawText(TITLE, (WINDOW_WIDTH / 2) - (MeasureText(TITLE, TITLE_FONT_SIZE) / 2), WINDOW_HEIGHT/10, TITLE_FONT_SIZE, RAYWHITE);
+		DrawText(TITLE, (WINDOW_WIDTH / 2) - (MeasureText(TITLE, TITLE_FONT_SIZE) / 2), WINDOW_HEIGHT/9, TITLE_FONT_SIZE, RAYWHITE);
 		DrawText("Press 'Enter' to begin", (WINDOW_WIDTH / 2) - (MeasureText("Press 'Enter' to begin", 30) / 2), 3 * (WINDOW_HEIGHT / 4), 30, DARKGRAY);
 
 	}break;
 	case Game:
 	{
+
 		DrawGame(WINDOW_WIDTH, WINDOW_HEIGHT);
 
 	}break;
 	case End:
 	{
+		if (gameState == Win) {
+			DrawText("You Win", (WINDOW_WIDTH / 2) - (MeasureText("You Win", 80) / 2), (WINDOW_HEIGHT / 2) - 80, 80, RAYWHITE);
+		}
+		else if (gameState == Lose) {
+			DrawText("You Lose", (WINDOW_WIDTH / 2) - (MeasureText("You Lose", 80) / 2), (WINDOW_HEIGHT / 2) - 80, 80, RAYWHITE);
+		}
+		
 
 	}break;
 	}
