@@ -10,16 +10,16 @@
 #define WINNING_SCORE 5
 #define SCORE_FONT_SIZE 50
 
-const int BOT_PADDLE_MIN_SPEED = -12;
-const int BOT_PADDLE_MAX_SPEED = 80;
+const int BOT_SPEED_VARIATION_MIN = -12;
+const int BOT_SPEED_VARIATION_MAX = 80;
 
 Vector2 ballPosition;
 Vector2 ballDirection;
-Rectangle leftPaddle;
-Rectangle rightPaddle;
+Rectangle botPaddle;
+Rectangle playerPaddle;
 
-int leftScore;
-int rightScore;
+int botScore;
+int playerScore;
 
 void InitializeGame(int windowWidth, int windowHeight) {
 
@@ -31,8 +31,15 @@ void InitializeGame(int windowWidth, int windowHeight) {
 	//-----------------------------------------------------------------------------
 
 	//paddles----------------------------------------------------------------------
-	leftPaddle = { PADDLE_PADDING, (float)windowHeight / 2 - PADDLE_HEIGHT / 2, PADDLE_WIDTH, PADDLE_HEIGHT };
-	rightPaddle = { (float)windowWidth - PADDLE_WIDTH - PADDLE_PADDING, (float)windowHeight / 2 - PADDLE_HEIGHT / 2, PADDLE_WIDTH, PADDLE_HEIGHT };
+	botPaddle = { PADDLE_PADDING, (float)windowHeight / 2 - PADDLE_HEIGHT / 2, PADDLE_WIDTH, PADDLE_HEIGHT };
+	playerPaddle = { (float)windowWidth - PADDLE_WIDTH - PADDLE_PADDING, (float)windowHeight / 2 - PADDLE_HEIGHT / 2, PADDLE_WIDTH, PADDLE_HEIGHT };
+	//-----------------------------------------------------------------------------
+
+	//scores-----------------------------------------------------------------------
+	if (botScore == WINNING_SCORE || playerScore == WINNING_SCORE) {
+		botScore = 0;
+		playerScore = 0;
+	}
 	//-----------------------------------------------------------------------------
 
 }
@@ -40,29 +47,30 @@ void InitializeGame(int windowWidth, int windowHeight) {
 
 void UpdateGame(int windowWidth, int windowHeight) {
 
-	//paddle control---------------------------------------------------------------
+	//paddle movement--------------------------------------------------------------
 
-	//left paddle
-	if (leftPaddle.y + (PADDLE_HEIGHT / 2) > ballPosition.y && leftPaddle.y > 0) {
-		leftPaddle.y -= (PADDLE_SPEED + GetRandomValue(BOT_PADDLE_MIN_SPEED, BOT_PADDLE_MAX_SPEED)) * GetFrameTime();
+	//bot paddle
+	if (botPaddle.y + (PADDLE_HEIGHT / 2) > ballPosition.y && botPaddle.y > 0) {
+		botPaddle.y -= (PADDLE_SPEED + GetRandomValue(BOT_SPEED_VARIATION_MIN, BOT_SPEED_VARIATION_MAX)) * GetFrameTime();
 	}
-	else if (leftPaddle.y + (PADDLE_HEIGHT / 2) < ballPosition.y && leftPaddle.y + PADDLE_HEIGHT < windowHeight) {
-		leftPaddle.y += (PADDLE_SPEED + GetRandomValue(BOT_PADDLE_MIN_SPEED, BOT_PADDLE_MAX_SPEED)) * GetFrameTime();
+	else if (botPaddle.y + (PADDLE_HEIGHT / 2) < ballPosition.y && botPaddle.y + PADDLE_HEIGHT < windowHeight) {
+		botPaddle.y += (PADDLE_SPEED + GetRandomValue(BOT_SPEED_VARIATION_MIN, BOT_SPEED_VARIATION_MAX)) * GetFrameTime();
 	}
 
-	//right paddle
-	if (IsKeyDown(KEY_UP) && rightPaddle.y > 0) {
-		rightPaddle.y -= PADDLE_SPEED * GetFrameTime();
+	//player paddle
+	if (IsKeyDown(KEY_UP) && playerPaddle.y > 0) {
+		playerPaddle.y -= PADDLE_SPEED * GetFrameTime();
 	}
-	else if (IsKeyDown(KEY_DOWN) && rightPaddle.y + PADDLE_HEIGHT < windowHeight) {
-		rightPaddle.y += PADDLE_SPEED * GetFrameTime();
+	else if (IsKeyDown(KEY_DOWN) && playerPaddle.y + PADDLE_HEIGHT < windowHeight) {
+		playerPaddle.y += PADDLE_SPEED * GetFrameTime();
 	}
+
 	//-----------------------------------------------------------------------------
 
 	//ball-paddle collision--------------------------------------------------------
 
-	//left paddle
-	if (CheckCollisionCircleRec(ballPosition, BALL_RADIUS, leftPaddle)) {
+	//bot paddle
+	if (CheckCollisionCircleRec(ballPosition, BALL_RADIUS, botPaddle)) {
 		
 		//increase ball's velocity-----------------------------------------------------
 		if (ballDirection.x > -1 && ballDirection.x < 1) {
@@ -73,24 +81,24 @@ void UpdateGame(int windowWidth, int windowHeight) {
 		}
 		//-----------------------------------------------------------------------------
 
-		if (ballPosition.x > leftPaddle.x + PADDLE_WIDTH) {
+		if (ballPosition.x > botPaddle.x + PADDLE_WIDTH) {
 			ballDirection.x *= -1;
-			ballPosition.x += (leftPaddle.x + PADDLE_WIDTH) - (ballPosition.x - BALL_RADIUS);
+			ballPosition.x += (botPaddle.x + PADDLE_WIDTH) - (ballPosition.x - BALL_RADIUS);
 		}
 
-		if (ballPosition.y + (BALL_RADIUS * 0.9) < leftPaddle.y) {
+		if (ballPosition.y + (BALL_RADIUS * 0.9) < botPaddle.y) {
 			ballDirection.y *= -1;
-			ballPosition.y -= (ballPosition.y + BALL_RADIUS) - leftPaddle.y;
+			ballPosition.y -= (ballPosition.y + BALL_RADIUS) - botPaddle.y;
 		}
-		else if (ballPosition.y - (BALL_RADIUS * 0.9) > leftPaddle.y + PADDLE_HEIGHT) {
+		else if (ballPosition.y - (BALL_RADIUS * 0.9) > botPaddle.y + PADDLE_HEIGHT) {
 			ballDirection.y *= -1;
-			ballPosition.y += (leftPaddle.y + PADDLE_HEIGHT) - (ballPosition.y - BALL_RADIUS);
+			ballPosition.y += (botPaddle.y + PADDLE_HEIGHT) - (ballPosition.y - BALL_RADIUS);
 		}
 
 	}
 
-	//right paddle
-	if (CheckCollisionCircleRec(ballPosition, BALL_RADIUS, rightPaddle)) {
+	//player paddle
+	if (CheckCollisionCircleRec(ballPosition, BALL_RADIUS, playerPaddle)) {
 
 		//increase ball's velocity-----------------------------------------------------
 		if (ballDirection.x > -1 && ballDirection.x < 1) {
@@ -101,18 +109,18 @@ void UpdateGame(int windowWidth, int windowHeight) {
 		}
 		//-----------------------------------------------------------------------------
 
-		if (ballPosition.x < rightPaddle.x) {
+		if (ballPosition.x < playerPaddle.x) {
 			ballDirection.x *= -1;
-			ballPosition.x -= (ballPosition.x + BALL_RADIUS) - (rightPaddle.x);
+			ballPosition.x -= (ballPosition.x + BALL_RADIUS) - (playerPaddle.x);
 		}
 
-		if (ballPosition.y < rightPaddle.y) {
+		if (ballPosition.y < playerPaddle.y) {
 			ballDirection.y *= -1;
-			ballPosition.y -= (ballPosition.y + BALL_RADIUS) - rightPaddle.y;
+			ballPosition.y -= (ballPosition.y + BALL_RADIUS) - playerPaddle.y;
 		}
-		else if (ballPosition.y > rightPaddle.y + PADDLE_HEIGHT) {
+		else if (ballPosition.y > playerPaddle.y + PADDLE_HEIGHT) {
 			ballDirection.y *= -1;
-			ballPosition.y += (rightPaddle.y + PADDLE_HEIGHT) - (ballPosition.y - BALL_RADIUS);
+			ballPosition.y += (playerPaddle.y + PADDLE_HEIGHT) - (ballPosition.y - BALL_RADIUS);
 		}
 
 	}
@@ -136,12 +144,16 @@ void UpdateGame(int windowWidth, int windowHeight) {
 
 	//point scored-----------------------------------------------------------------
 	if (ballPosition.x + BALL_RADIUS < 0) {
-		rightScore++;
-		InitializeGame(windowWidth, windowHeight);
+		playerScore++;
+		if (playerScore != WINNING_SCORE) {
+			InitializeGame(windowWidth, windowHeight);
+		}
 	}
 	else if (ballPosition.x - BALL_RADIUS > windowWidth) {
-		leftScore++;
-		InitializeGame(windowWidth, windowHeight);
+		botScore++;
+		if (botScore != WINNING_SCORE) {
+			InitializeGame(windowWidth, windowHeight);
+		}
 	}
 	//-----------------------------------------------------------------------------
 }
@@ -153,24 +165,24 @@ void DrawGame(int windowWidth, int windowHeight) {
 	//-----------------------------------------------------------------------------
 
 	//score------------------------------------------------------------------------
-	const char* leftScoreText = TextFormat("BOT: %i", leftScore);
-	const char* rightScoreText = TextFormat("YOU: %i", rightScore);
-	DrawText(leftScoreText, (2 * (windowWidth / 8)) - (MeasureText(leftScoreText, SCORE_FONT_SIZE) / 2), windowHeight / 10, SCORE_FONT_SIZE, DARKGRAY);
-	DrawText(rightScoreText, (6 * (windowWidth / 8)) - (MeasureText(rightScoreText, SCORE_FONT_SIZE) / 2), windowHeight / 10, SCORE_FONT_SIZE, DARKGRAY);
+	const char* botScoreText = TextFormat("BOT: %i", botScore);
+	const char* playerScoreText = TextFormat("YOU: %i", playerScore);
+	DrawText(botScoreText, (2 * (windowWidth / 8)) - (MeasureText(botScoreText, SCORE_FONT_SIZE) / 2), windowHeight / 10, SCORE_FONT_SIZE, DARKGRAY);
+	DrawText(playerScoreText, (6 * (windowWidth / 8)) - (MeasureText(playerScoreText, SCORE_FONT_SIZE) / 2), windowHeight / 10, SCORE_FONT_SIZE, DARKGRAY);
 	//-----------------------------------------------------------------------------
 
 	//game elements----------------------------------------------------------------
 	DrawCircle(ballPosition.x, ballPosition.y, BALL_RADIUS, RAYWHITE);
-	DrawRectangleRec(leftPaddle, RAYWHITE);
-	DrawRectangleRec(rightPaddle, RAYWHITE);
+	DrawRectangleRec(botPaddle, RAYWHITE);
+	DrawRectangleRec(playerPaddle, RAYWHITE);
 	//-----------------------------------------------------------------------------
 }
 
 GameState GetGameState() {
-	if (rightScore == WINNING_SCORE) {
+	if (playerScore == WINNING_SCORE) {
 		return Win;
 	}
-	else if (leftScore == WINNING_SCORE) {
+	else if (botScore == WINNING_SCORE) {
 		return Lose;
 	}
 	else {

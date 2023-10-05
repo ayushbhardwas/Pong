@@ -1,6 +1,5 @@
 #include "raylib.h"
 #include "game.h"
-#include <iostream>
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
@@ -50,6 +49,13 @@ void Update() {
 			gameState = GetGameState();
 		}
 	}break;
+	case End:
+	{
+		if (IsKeyPressed(KEY_ENTER)) {
+			InitializeGame(WINDOW_WIDTH, WINDOW_HEIGHT);
+			programState = Game;
+		}
+	}break;
 	}
 
 }
@@ -68,7 +74,6 @@ void Draw() {
 	}break;
 	case Game:
 	{
-
 		DrawGame(WINDOW_WIDTH, WINDOW_HEIGHT);
 
 	}break;
@@ -80,7 +85,8 @@ void Draw() {
 		else if (gameState == Lose) {
 			DrawText("You Lose", (WINDOW_WIDTH / 2) - (MeasureText("You Lose", 80) / 2), (WINDOW_HEIGHT / 2) - 80, 80, RAYWHITE);
 		}
-		
+
+		DrawText("Press 'Enter' to play again", (WINDOW_WIDTH / 2) - (MeasureText("Press 'Enter' to play again", 30) / 2), 3 * (WINDOW_HEIGHT / 4), 30, DARKGRAY);
 
 	}break;
 	}
